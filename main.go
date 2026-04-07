@@ -4,16 +4,18 @@ import (
 	"net/http"
 
 	"go.uber.org/zap"
+	"logger/logger"
 )
 
-var logger *zap.Logger
 
 func main() {
-	logger, _ = zap.NewProduction()
+	logger.Init(logger.Config{
+		Env: "dev",
+	})
+	
 	defer logger.Sync()
 
 	mux := http.NewServeMux()
-
 	mux.HandleFunc("/hello", helloHandler)
 	mux.HandleFunc("/error", errorHandler)
 
@@ -27,14 +29,14 @@ func main() {
 func helloHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Hello world"))
 	logger.Info("hello handler",
-		zap.String("method", r.Method),
-		zap.String("path", r.URL.Path),
+		logger.String("method", r.Method),
+		logger.String("path", r.URL.Path),
 	)
 }
 
 func errorHandler(w http.ResponseWriter, r *http.Request) {
 	http.Error(w, "Something went wrong", http.StatusInternalServerError)
 	logger.Error("error handler",
-		zap.String("method", r.Method),
+		logger.String("method", r.Method),
 	)
 }
